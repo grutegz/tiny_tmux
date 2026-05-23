@@ -1,6 +1,9 @@
 import os
 import pty
 import signal
+import fcntl
+import termios
+import struct
 
 BUFFER_SIZE = 1024
 
@@ -20,8 +23,14 @@ class TerminalSession:
         if self.pid == 0:
             os.execlp(self.command, self.command)
 
+    def set_window_size(self, rows, cols):
+        """Передает PTY информацию о размере виртуального экрана."""
+        if self.master_fd is not None:
+            winsize = struct.pack("HHHH", rows, cols, 0, 0)
+            fcntl.ioctl(self.master_fd, termios.TIOCSWINSZ, winsize)
+
     def read_output(self):
-        """Читает данные из PTY и сохраняет их в буфер экрана."""
+        """Читает данные из PTY и сохраняет их в буфер."""
         try:
             data = os.read(self.master_fd, BUFFER_SIZE)
             self.screen_buffer += data

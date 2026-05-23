@@ -1,2 +1,3 @@
 # tiny_tmux
-minimalistic multiplexor for unix systems 
+
+minimalistic multiplexor for unix systems on python. 
