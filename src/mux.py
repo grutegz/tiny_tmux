@@ -19,17 +19,16 @@ DELETE_KEY = b"d"
 
 CLEAR_SCREEN_SEQ = b"\x1b[2J\x1b[H"
 EXIT_SEQ = b"\r\n"
-`
+
 SAVE_CURSOR = b"\x1b7"
 RESTORE_CURSOR = b"\x1b8"
 REVERSE_VIDEO = b"\x1b[7m"
 RESET_FMT = b"\x1b[0m"
-`
+
 class Multiplexer:
-    """Оболочка для управления сессиями с отрисовкой статус-бара."""
+    """Оболочка для управления сессиями"""
 
     def __init__(self, default_command="/bin/bash"):
-        """Инициализирует мультиплексор."""
         self.default_command = default_command
         self.sessions = []
         self.active_index = 0
@@ -39,7 +38,7 @@ class Multiplexer:
         self._create_session()
 
     def _create_session(self):
-        """Создает новую сессию с ограничением размера PTY."""
+        """Создает новую сессию"""
         session = TerminalSession(self.default_command)
         session.start()
         
@@ -50,7 +49,7 @@ class Multiplexer:
         self.active_index = len(self.sessions) - 1
 
     def _delete_session(self, index):
-        """Удаляет сессию по индексу."""
+        """Удаляет сессию по индексу"""
         session = self.sessions.pop(index)
         session.terminate()
         
@@ -61,7 +60,7 @@ class Multiplexer:
             self._redraw_screen()
 
     def run(self):
-        """Настраивает терминал и запускает главный цикл."""
+        """Настраивает терминал и запускает главный цикл"""
         self.old_tty_settings = termios.tcgetattr(STDIN_FD)
         try:
             tty.setraw(STDIN_FD)
@@ -71,7 +70,7 @@ class Multiplexer:
             self._cleanup()
 
     def _event_loop(self):
-        """Главный цикл ввода-вывода."""
+        """Главный цикл ввода-вывода"""
         while self.running:
             master_fds = [s.master_fd for s in self.sessions]
             ready_to_read, _, _ = select.select([STDIN_FD] + master_fds, [], [])
@@ -98,7 +97,7 @@ class Multiplexer:
                 self._handle_input(user_input)
 
     def _handle_input(self, data):
-        """Обрабатывает ввод и бинды."""
+        """Обработчик ввода"""
         if self.prefix_mode:
             self.prefix_mode = False
             if data == NEXT_KEY:
@@ -126,7 +125,6 @@ class Multiplexer:
             active_session.write_input(data)
 
     def _draw_status_bar(self):
-        """Отрисовывает статус-бар на последней строке терминала."""
         if not self.running or not self.sessions:
             return
             
@@ -148,7 +146,6 @@ class Multiplexer:
         os.write(STDOUT_FD, status_seq)
 
     def _redraw_screen(self):
-        """Перерисовывает экран активной сессии и статус-бар."""
         if not self.running or not self.sessions:
             return
         os.write(STDOUT_FD, CLEAR_SCREEN_SEQ)
@@ -160,7 +157,6 @@ class Multiplexer:
         self._draw_status_bar()
 
     def _cleanup(self):
-        """Завершает работу."""
         for session in self.sessions:
             session.terminate()
         self.sessions.clear()

@@ -2,7 +2,7 @@ import argparse
 from mux import Multiplexer
 
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser(
         description='Minimalistic terminal multiplexor for unix systems.'
     )
@@ -18,5 +18,3 @@ if __name__ == '__main__':
     command = args.cmd if args.cmd else '/bin/bash'
     mux = Multiplexer(command)
     mux.run()
-
-

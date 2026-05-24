@@ -8,29 +8,25 @@ import struct
 BUFFER_SIZE = 1024
 
 class TerminalSession:
-    """Класс, инкапсулирующий процесс оболочки и его PTY."""
-
+    """Класс, инкапсулириующий PTY"""
     def __init__(self, command="/bin/bash"):
-        """Инициализирует базовые параметры сессии."""
         self.command = command
         self.master_fd = None
         self.pid = None
         self.screen_buffer = b""
 
     def start(self):
-        """Создает PTY и запускает процесс."""
         self.pid, self.master_fd = pty.fork()
         if self.pid == 0:
             os.execlp(self.command, self.command)
 
     def set_window_size(self, rows, cols):
-        """Передает PTY информацию о размере виртуального экрана."""
         if self.master_fd is not None:
             winsize = struct.pack("HHHH", rows, cols, 0, 0)
             fcntl.ioctl(self.master_fd, termios.TIOCSWINSZ, winsize)
 
     def read_output(self):
-        """Читает данные из PTY и сохраняет их в буфер."""
+        """Читает данные из PTY и сохраняет их в буфер"""
         try:
             data = os.read(self.master_fd, BUFFER_SIZE)
             self.screen_buffer += data
@@ -39,14 +35,13 @@ class TerminalSession:
             return b""
 
     def write_input(self, data):
-        """Отправляет данные в PTY."""
-        try:
+        try: 
             os.write(self.master_fd, data)
         except OSError:
             pass
 
     def terminate(self):
-        """Закрывает файловый дескриптор и жестко убивает дочерний процесс."""
+        """Закрывает файловый дескриптор и жестко убивает дочерний процесс"""
         if self.master_fd is not None:
             try:
                 os.close(self.master_fd)
