@@ -27,9 +27,8 @@ RESET_FMT = b"\x1b[0m"
 
 class Multiplexer:
     """Оболочка для управления сессиями"""
-
-    def __init__(self, default_command="/bin/bash"):
-        self.default_command = default_command
+    def __init__(self, command="/bin/bash"):
+        self.command = command
         self.sessions = []
         self.active_index = 0
         self.prefix_mode = False
@@ -39,7 +38,7 @@ class Multiplexer:
 
     def _create_session(self):
         """Создает новую сессию"""
-        session = TerminalSession(self.default_command)
+        session = TerminalSession(self.command)
         session.start()
         
         columns, rows = shutil.get_terminal_size()
